@@ -1,47 +1,29 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Text, Alert } from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
-  const handleLogin = () => {
-    // Por implementar
-    navigation.navigate('Menu');
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('Login exitoso:', user.email);
+      navigation.replace('Menu'); // redirige a la pantalla principal
+    } catch (err) {
+      console.log('Error al iniciar sesión:', err.message);
+      setError(err.message);
+      Alert.alert('Error de inicio de sesión', err.message);
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex:1, justifyContent:'center', padding:20 }}>
       <TextInput
-        placeholder="Correo"
+        placeholder="Correo electrónico"
         value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        autoCapitalize="none"
-      />
-      <TextInput
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-      />
-      <Button title="Login" onPress={handleLogin} />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 12,
-    borderRadius: 4,
-  },
-});
+        on
