@@ -11,7 +11,7 @@ export default function MenuScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.greeting}>¡Hola, {email}!</Text>
-      <Button title="Nuevo" onPress={() => goToForm('Nuevo')} />
+      <Button title="Nuevo" onPress={() => navigation.navigate('NuevoRegistro')} />
       <Button title="Modificar" onPress={() => goToForm('Modificar')} />
       <Button title="Eliminar" onPress={() => goToForm('Eliminar')} />
       <Button title="Consultar" onPress={() => goToForm('Consultar')} />
