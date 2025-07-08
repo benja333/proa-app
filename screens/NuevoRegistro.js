@@ -17,8 +17,12 @@ export default function NuevoRegistro() {
   // States for each form field
   const [nombrePaciente, setNombrePaciente] = useState('');
   const [apellidoPaciente, setApellidoPaciente] = useState('');
+  // historiaClinica is stored as a string so we can validate length
+  // but represents a numeric patient record
   const [historiaClinica, setHistoriaClinica] = useState('');
   const [sexo, setSexo] = useState('M');
+  // numeric fields are stored as strings for input handling and later
+  // converted to numbers when submitting
   const [edad, setEdad] = useState('');
   const [piso, setPiso] = useState('2do H');
   const [cama, setCama] = useState('');
@@ -102,15 +106,15 @@ export default function NuevoRegistro() {
       apellidoPaciente,
       historiaClinica,
       sexo,
-      edad,
+      edad: Number(edad),
       piso,
-      cama,
+      cama: Number(cama),
       nombreMedico,
       apellidoMedico,
       especialidad,
       droga,
-      dosis,
-      frecuencia,
+      dosis: Number(dosis),
+      frecuencia: Number(frecuencia),
       fechaIngreso: formatDate(fechaIngreso),
       fechaInicio: formatDate(fechaInicio),
       tipoTerapia,
