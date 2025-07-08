@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert } from 'react-native';
+import { View, TextInput, Button, Text } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log('Login exitoso:', user.email);
+      setError('');
       navigation.replace('Menu');
     } catch (err) {
       console.log('Error al iniciar sesión:', err.message);
-      setError(err.message);
-      Alert.alert('Error de inicio de sesión', err.message);
+      setError('Correo electrónico o contraseña incorrectos');
     }
   };
 
@@ -36,6 +36,8 @@ export default function LoginScreen({ navigation }) {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        returnKeyType="done"
+        onSubmitEditing={handleLogin}
         style={{ marginBottom: 20, borderWidth: 1, padding: 10, borderRadius: 5 }}
       />
       <Button title="Ingresar" onPress={handleLogin} />
