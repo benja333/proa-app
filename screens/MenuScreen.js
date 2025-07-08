@@ -1,13 +1,16 @@
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, Button, StyleSheet, Text } from 'react-native';
+import { auth } from '../firebase/firebaseConfig';
 
 export default function MenuScreen({ navigation }) {
+  const email = auth.currentUser?.email;
   const goToForm = (modo) => {
     navigation.navigate('Form', { modo });
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.greeting}>¡Hola, {email}!</Text>
       <Button title="Nuevo" onPress={() => goToForm('Nuevo')} />
       <Button title="Modificar" onPress={() => goToForm('Modificar')} />
       <Button title="Eliminar" onPress={() => goToForm('Eliminar')} />
@@ -19,7 +22,12 @@ export default function MenuScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     padding: 16,
+  },
+  greeting: {
+    fontSize: 18,
+    marginBottom: 20,
   },
 });
