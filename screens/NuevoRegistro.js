@@ -8,21 +8,17 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth } from '../firebase/firebaseConfig';
 
 export default function NuevoRegistro() {
-  // States for each form field
   const [nombrePaciente, setNombrePaciente] = useState('');
   const [apellidoPaciente, setApellidoPaciente] = useState('');
-  // historiaClinica is stored as a string so we can validate length
-  // but represents a numeric patient record
   const [historiaClinica, setHistoriaClinica] = useState('');
   const [sexo, setSexo] = useState('M');
-  // numeric fields are stored as strings for input handling and later
-  // converted to numbers when submitting
   const [edad, setEdad] = useState('');
   const [piso, setPiso] = useState('2do H');
   const [cama, setCama] = useState('');
@@ -32,24 +28,23 @@ export default function NuevoRegistro() {
   const [droga, setDroga] = useState('');
   const [dosis, setDosis] = useState('');
   const [frecuencia, setFrecuencia] = useState('');
-  const [fechaIngreso, setFechaIngreso] = useState(null);
+  const [fechaIngreso, setFechaIngreso] = useState('');
   const [showFechaIngreso, setShowFechaIngreso] = useState(false);
-  const [fechaInicio, setFechaInicio] = useState(null);
+  const [fechaInicio, setFechaInicio] = useState('');
   const [showFechaInicio, setShowFechaInicio] = useState(false);
   const [tipoTerapia, setTipoTerapia] = useState('Empírica');
   const [foco, setFoco] = useState('');
   const [observaciones, setObservaciones] = useState('');
 
-  // Format a Date object as dd/mm/aaaa
   const formatDate = (date) => {
     if (!date) return '';
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   };
 
-  // Basic validations for the form
   const validateForm = () => {
     if (
       !nombrePaciente ||
@@ -71,7 +66,7 @@ export default function NuevoRegistro() {
       return false;
     }
 
-    if (!/^\d{6}$/.test(historiaClinica)) {
+    if (!/^[0-9]{6}$/.test(historiaClinica)) {
       Alert.alert('Error', 'Historia Clínica debe tener 6 dígitos');
       return false;
     }
@@ -137,7 +132,6 @@ export default function NuevoRegistro() {
 
       if (data && data.success) {
         Alert.alert('Registro ingresado con éxito');
-        // reset form after successful submission
         setNombrePaciente('');
         setApellidoPaciente('');
         setHistoriaClinica('');
@@ -151,8 +145,8 @@ export default function NuevoRegistro() {
         setDroga('');
         setDosis('');
         setFrecuencia('');
-        setFechaIngreso(null);
-        setFechaInicio(null);
+        setFechaIngreso('');
+        setFechaInicio('');
         setTipoTerapia('Empírica');
         setFoco('');
         setObservaciones('');
@@ -222,48 +216,70 @@ export default function NuevoRegistro() {
       <Text style={styles.label}>Frecuencia</Text>
       <TextInput style={styles.input} value={frecuencia} onChangeText={setFrecuencia} keyboardType="numeric" />
 
-      <Text style={styles.label}>Fecha de ingreso (dd/mm/aaaa)</Text>
-      <TouchableOpacity onPress={() => setShowFechaIngreso(true)}>
+      <Text style={styles.label}>Fecha de ingreso</Text>
+      {Platform.OS === 'web' ? (
         <TextInput
           style={styles.input}
-          value={formatDate(fechaIngreso)}
-          editable={false}
+          value={fechaIngreso}
+          onChangeText={setFechaIngreso}
           placeholder="dd/mm/aaaa"
-          pointerEvents="none"
+          type="date"
         />
-      </TouchableOpacity>
-      {showFechaIngreso && (
-        <DateTimePicker
-          value={fechaIngreso || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setShowFechaIngreso(false);
-            if (date) setFechaIngreso(date);
-          }}
-        />
+      ) : (
+        <>
+          <TouchableOpacity onPress={() => setShowFechaIngreso(true)}>
+            <TextInput
+              style={styles.input}
+              value={formatDate(fechaIngreso)}
+              editable={false}
+              placeholder="dd/mm/aaaa"
+            />
+          </TouchableOpacity>
+          {showFechaIngreso && (
+            <DateTimePicker
+              value={fechaIngreso ? new Date(fechaIngreso) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event, date) => {
+                setShowFechaIngreso(false);
+                if (date) setFechaIngreso(date);
+              }}
+            />
+          )}
+        </>
       )}
 
-      <Text style={styles.label}>Fecha de inicio (dd/mm/aaaa)</Text>
-      <TouchableOpacity onPress={() => setShowFechaInicio(true)}>
+      <Text style={styles.label}>Fecha de inicio</Text>
+      {Platform.OS === 'web' ? (
         <TextInput
           style={styles.input}
-          value={formatDate(fechaInicio)}
-          editable={false}
+          value={fechaInicio}
+          onChangeText={setFechaInicio}
           placeholder="dd/mm/aaaa"
-          pointerEvents="none"
+          type="date"
         />
-      </TouchableOpacity>
-      {showFechaInicio && (
-        <DateTimePicker
-          value={fechaInicio || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setShowFechaInicio(false);
-            if (date) setFechaInicio(date);
-          }}
-        />
+      ) : (
+        <>
+          <TouchableOpacity onPress={() => setShowFechaInicio(true)}>
+            <TextInput
+              style={styles.input}
+              value={formatDate(fechaInicio)}
+              editable={false}
+              placeholder="dd/mm/aaaa"
+            />
+          </TouchableOpacity>
+          {showFechaInicio && (
+            <DateTimePicker
+              value={fechaInicio ? new Date(fechaInicio) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event, date) => {
+                setShowFechaInicio(false);
+                if (date) setFechaInicio(date);
+              }}
+            />
+          )}
+        </>
       )}
 
       <Text style={styles.label}>Tipo de terapia</Text>
@@ -314,4 +330,3 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
 });
-
