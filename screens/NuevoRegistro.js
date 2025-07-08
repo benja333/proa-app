@@ -124,12 +124,16 @@ export default function NuevoRegistro() {
     };
 
     try {
-      const res = await fetch('https://script.google.com/macros/s/AKfycbx-xqi0vx7K0IsebkhDxwMfRAydzQUAywTgLspMOtxmkCa_pRpH_yKvB6jPIO0ASXcfGA/exec', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        'https://script.google.com/macros/s/AKfycbx-xqi0vx7K0IsebkhDxwMfRAydzQUAywTgLspMOtxmkCa_pRpH_yKvB6jPIO0ASXcfGA/exec',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
+      console.log('Response:', data);
 
       if (data && data.success) {
         Alert.alert('Registro ingresado con éxito');
@@ -153,11 +157,11 @@ export default function NuevoRegistro() {
         setFoco('');
         setObservaciones('');
       } else {
-        Alert.alert('Error', 'No se pudo enviar el registro');
+        Alert.alert('Error al enviar');
       }
     } catch (error) {
       console.error('Error al enviar datos', error);
-      Alert.alert('Error', 'Ocurrió un error al enviar');
+      Alert.alert('Error al enviar');
     }
   };
 
