@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 
-export default function LoginScreen({ navigation }) {
+export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log('Login exitoso:', user.email);
+      console.log('Registro exitoso:', user.email);
       navigation.replace('Menu');
     } catch (err) {
-      console.log('Error al iniciar sesión:', err.message);
+      console.log('Error al registrarse:', err.message);
       setError(err.message);
-      Alert.alert('Error de inicio de sesión', err.message);
+      Alert.alert('Error de registro', err.message);
     }
   };
 
@@ -38,11 +38,8 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
         style={{ marginBottom: 20, borderWidth: 1, padding: 10, borderRadius: 5 }}
       />
-      <Button title="Ingresar" onPress={handleLogin} />
-      <View style={{ height: 10 }} />
-      <Button title="Registrarse" onPress={() => navigation.navigate('Register')} />
+      <Button title="Registrar" onPress={handleRegister} />
       {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
     </View>
   );
 }
-
