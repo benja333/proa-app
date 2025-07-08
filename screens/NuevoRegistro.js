@@ -120,7 +120,7 @@ export default function NuevoRegistro() {
 
     try {
       const res = await fetch(
-        'https://script.google.com/macros/s/AKfycbx-xqi0vx7K0IsebkhDxwMfRAydzQUAywTgLspMOtxmkCa_pRpH_yKvB6jPIO0ASXcfGA/exec',
+        'http://localhost:3000/enviar',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
