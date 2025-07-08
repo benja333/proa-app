@@ -1,42 +1,118 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth } from '../firebase/firebaseConfig';
 
 export default function NuevoRegistro() {
+  // States for each form field
   const [nombrePaciente, setNombrePaciente] = useState('');
+  const [apellidoPaciente, setApellidoPaciente] = useState('');
   const [historiaClinica, setHistoriaClinica] = useState('');
   const [sexo, setSexo] = useState('M');
   const [edad, setEdad] = useState('');
   const [piso, setPiso] = useState('2do H');
   const [cama, setCama] = useState('');
-  const [medico, setMedico] = useState('');
+  const [nombreMedico, setNombreMedico] = useState('');
+  const [apellidoMedico, setApellidoMedico] = useState('');
   const [especialidad, setEspecialidad] = useState('');
   const [droga, setDroga] = useState('');
   const [dosis, setDosis] = useState('');
   const [frecuencia, setFrecuencia] = useState('');
-  const [fechaIngreso, setFechaIngreso] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaIngreso, setFechaIngreso] = useState(null);
+  const [showFechaIngreso, setShowFechaIngreso] = useState(false);
+  const [fechaInicio, setFechaInicio] = useState(null);
+  const [showFechaInicio, setShowFechaInicio] = useState(false);
   const [tipoTerapia, setTipoTerapia] = useState('Empírica');
   const [foco, setFoco] = useState('');
   const [observaciones, setObservaciones] = useState('');
 
+  // Format a Date object as dd/mm/aaaa
+  const formatDate = (date) => {
+    if (!date) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Basic validations for the form
+  const validateForm = () => {
+    if (
+      !nombrePaciente ||
+      !apellidoPaciente ||
+      !historiaClinica ||
+      !edad ||
+      !cama ||
+      !nombreMedico ||
+      !apellidoMedico ||
+      !especialidad ||
+      !droga ||
+      !dosis ||
+      !frecuencia ||
+      !fechaIngreso ||
+      !fechaInicio ||
+      !foco
+    ) {
+      Alert.alert('Error', 'Todos los campos obligatorios deben estar completos');
+      return false;
+    }
+
+    if (!/^\d{6}$/.test(historiaClinica)) {
+      Alert.alert('Error', 'Historia Clínica debe tener 6 dígitos');
+      return false;
+    }
+
+    const numeric = [
+      { value: edad, name: 'Edad', positive: true },
+      { value: cama, name: 'Cama' },
+      { value: dosis, name: 'Dosis' },
+      { value: frecuencia, name: 'Frecuencia' },
+    ];
+
+    for (const { value, name, positive } of numeric) {
+      if (value === '' || isNaN(value)) {
+        Alert.alert('Error', `${name} debe ser un número válido`);
+        return false;
+      }
+      if (positive && Number(value) <= 0) {
+        Alert.alert('Error', `${name} debe ser un número positivo`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     const usuario = auth.currentUser?.email || '';
     const payload = {
       nombrePaciente,
+      apellidoPaciente,
       historiaClinica,
       sexo,
       edad,
       piso,
       cama,
-      medico,
+      nombreMedico,
+      apellidoMedico,
       especialidad,
       droga,
       dosis,
       frecuencia,
-      fechaIngreso,
-      fechaInicio,
+      fechaIngreso: formatDate(fechaIngreso),
+      fechaInicio: formatDate(fechaInicio),
       tipoTerapia,
       foco,
       observaciones,
@@ -44,14 +120,34 @@ export default function NuevoRegistro() {
     };
 
     try {
-      const res = await fetch('https://script.google.com/macros/s/AKfycbzG0V4O6EUu9tiEooydwp3sf7lTaJdix89Hs6P1HNfqPOkFRJp92fZl_tVcgVWX1Z2vQQ/exec', {
+      const res = await fetch('https://script.google.com/macros/s/AKfycbx-xqi0vx7K0IsebkhDxwMfRAydzQUAywTgLspMOtxmkCa_pRpH_yKvB6jPIO0ASXcfGA/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const data = await res.json();
 
-      if (res.ok) {
-        Alert.alert('Éxito', 'Registro enviado correctamente');
+      if (data && data.success) {
+        Alert.alert('Registro ingresado con éxito');
+        // reset form after successful submission
+        setNombrePaciente('');
+        setApellidoPaciente('');
+        setHistoriaClinica('');
+        setSexo('M');
+        setEdad('');
+        setPiso('2do H');
+        setCama('');
+        setNombreMedico('');
+        setApellidoMedico('');
+        setEspecialidad('');
+        setDroga('');
+        setDosis('');
+        setFrecuencia('');
+        setFechaIngreso(null);
+        setFechaInicio(null);
+        setTipoTerapia('Empírica');
+        setFoco('');
+        setObservaciones('');
       } else {
         Alert.alert('Error', 'No se pudo enviar el registro');
       }
@@ -66,8 +162,17 @@ export default function NuevoRegistro() {
       <Text style={styles.label}>Nombre del paciente</Text>
       <TextInput style={styles.input} value={nombrePaciente} onChangeText={setNombrePaciente} />
 
+      <Text style={styles.label}>Apellido del paciente</Text>
+      <TextInput style={styles.input} value={apellidoPaciente} onChangeText={setApellidoPaciente} />
+
       <Text style={styles.label}>Historia Clínica</Text>
-      <TextInput style={styles.input} value={historiaClinica} onChangeText={setHistoriaClinica} keyboardType="numeric" />
+      <TextInput
+        style={styles.input}
+        value={historiaClinica}
+        onChangeText={setHistoriaClinica}
+        keyboardType="numeric"
+        maxLength={6}
+      />
 
       <Text style={styles.label}>Sexo</Text>
       <Picker selectedValue={sexo} onValueChange={setSexo} style={styles.input}>
@@ -91,8 +196,11 @@ export default function NuevoRegistro() {
       <Text style={styles.label}>Cama</Text>
       <TextInput style={styles.input} value={cama} onChangeText={setCama} keyboardType="numeric" />
 
-      <Text style={styles.label}>Médico</Text>
-      <TextInput style={styles.input} value={medico} onChangeText={setMedico} />
+      <Text style={styles.label}>Nombre del médico</Text>
+      <TextInput style={styles.input} value={nombreMedico} onChangeText={setNombreMedico} />
+
+      <Text style={styles.label}>Apellido del médico</Text>
+      <TextInput style={styles.input} value={apellidoMedico} onChangeText={setApellidoMedico} />
 
       <Text style={styles.label}>Especialidad</Text>
       <TextInput style={styles.input} value={especialidad} onChangeText={setEspecialidad} />
@@ -107,10 +215,48 @@ export default function NuevoRegistro() {
       <TextInput style={styles.input} value={frecuencia} onChangeText={setFrecuencia} keyboardType="numeric" />
 
       <Text style={styles.label}>Fecha de ingreso (dd/mm/aaaa)</Text>
-      <TextInput style={styles.input} value={fechaIngreso} onChangeText={setFechaIngreso} />
+      <TouchableOpacity onPress={() => setShowFechaIngreso(true)}>
+        <TextInput
+          style={styles.input}
+          value={formatDate(fechaIngreso)}
+          editable={false}
+          placeholder="dd/mm/aaaa"
+          pointerEvents="none"
+        />
+      </TouchableOpacity>
+      {showFechaIngreso && (
+        <DateTimePicker
+          value={fechaIngreso || new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowFechaIngreso(false);
+            if (date) setFechaIngreso(date);
+          }}
+        />
+      )}
 
       <Text style={styles.label}>Fecha de inicio (dd/mm/aaaa)</Text>
-      <TextInput style={styles.input} value={fechaInicio} onChangeText={setFechaInicio} />
+      <TouchableOpacity onPress={() => setShowFechaInicio(true)}>
+        <TextInput
+          style={styles.input}
+          value={formatDate(fechaInicio)}
+          editable={false}
+          placeholder="dd/mm/aaaa"
+          pointerEvents="none"
+        />
+      </TouchableOpacity>
+      {showFechaInicio && (
+        <DateTimePicker
+          value={fechaInicio || new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowFechaInicio(false);
+            if (date) setFechaInicio(date);
+          }}
+        />
+      )}
 
       <Text style={styles.label}>Tipo de terapia</Text>
       <Picker selectedValue={tipoTerapia} onValueChange={setTipoTerapia} style={styles.input}>
@@ -130,6 +276,8 @@ export default function NuevoRegistro() {
         value={observaciones}
         onChangeText={setObservaciones}
         multiline
+        returnKeyType="send"
+        onSubmitEditing={handleSubmit}
       />
 
       <View style={{ marginVertical: 20 }}>
