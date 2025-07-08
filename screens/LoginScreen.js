@@ -13,7 +13,7 @@ export default function LoginScreen({ navigation }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log('Login exitoso:', user.email);
-      navigation.replace('Menu'); // redirige a la pantalla principal
+      navigation.replace('Menu');
     } catch (err) {
       console.log('Error al iniciar sesión:', err.message);
       setError(err.message);
@@ -22,8 +22,25 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex:1, justifyContent:'center', padding:20 }}>
+    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
       <TextInput
         placeholder="Correo electrónico"
         value={email}
-        on
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        style={{ marginBottom: 10, borderWidth: 1, padding: 10, borderRadius: 5 }}
+      />
+      <TextInput
+        placeholder="Contraseña"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{ marginBottom: 20, borderWidth: 1, padding: 10, borderRadius: 5 }}
+      />
+      <Button title="Ingresar" onPress={handleLogin} />
+      {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
+    </View>
+  );
+}
+
